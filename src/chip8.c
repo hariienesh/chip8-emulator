@@ -25,8 +25,63 @@ void execute(Chip8 *cpu, uint16_t op) {
     break;
 
   case 0x8:
-    if (N == 0x0) {
+    switch (N) {
+
+    case 0x0:
       cpu->V[X] = cpu->V[Y];
+      break;
+
+    case 0x1:
+      cpu->V[X] = cpu->V[X] | cpu->V[Y];
+      break;
+
+    case 0x2:
+      cpu->V[X] = cpu->V[X] & cpu->V[Y];
+      break;
+
+    case 0x3:
+      cpu->V[X] = cpu->V[X] ^ cpu->V[Y];
+      break;
+
+    case 0x4: {
+      uint16_t sum = cpu->V[X] + cpu->V[Y];
+      cpu->V[0xF] = (sum > 0xFF);
+      cpu->V[X] = sum & 0xFF;
+    } break;
+
+    case 0x5: {
+      uint8_t vx = cpu->V[X];
+      uint8_t vy = cpu->V[Y];
+      uint8_t vf = (vx >= vy);
+
+      cpu->V[X] = vx - vy;
+      cpu->V[0xF] = vf;
+    } break;
+
+    case 0x6: {
+      uint8_t vx = cpu->V[X];
+      uint8_t vf = vx & 0x1;
+
+      cpu->V[X] = vx >> 1;
+      cpu->V[0xF] = vf;
+    } break;
+
+    case 0x7: {
+      uint8_t vx = cpu->V[X];
+      uint8_t vy = cpu->V[Y];
+      uint8_t vf = (vy >= vx);
+
+      cpu->V[X] = vy - vx;
+      cpu->V[0xF] = vf;
+    } break;
+
+    case 0xE: {
+      uint8_t vx = cpu->V[X];
+      uint8_t vf = (vx >> 7) & 1;
+
+      cpu->V[X] = vx << 1;
+      cpu->V[0xF] = vf;
+    } break;
     }
     break;
 
