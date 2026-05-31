@@ -4,15 +4,37 @@
 
 void execute(Chip8 *cpu, uint16_t op) {
   uint8_t type = (op >> 12) & 0xF;
-  uint16_t NNN = op & 0x0FFF;
+  uint8_t X = (op >> 8) & 0xF;
+  uint8_t Y = (op >> 4) & 0xF;
+  uint8_t N = op & 0xF;
+  uint8_t NN = (op) & 0xFF;
+  uint16_t NNN = op & 0xFFF;
 
   switch (type) {
   case 0x0:
     if (op == 0x00E0)
       printf("CLEAR\n");
     break;
+
+  case 0x6:
+    cpu->V[X] = NN;
+    break;
+
+  case 0x7:
+    cpu->V[X] += NN;
+    break;
+
+  case 0x8:
+    if (N == 0x0) {
+      cpu->V[X] = cpu->V[Y];
+    }
+    break;
+
   case 0x1:
     cpu->PC = NNN;
+    break;
+
+  default:
     break;
   }
 }
