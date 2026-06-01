@@ -18,6 +18,23 @@ void chip8_init_sdl(Chip8 *cpu) {
                                    SDL_TEXTUREACCESS_STREAMING, 64, 32);
 }
 
+void chip8_draw(Chip8 *cpu) {
+    uint32_t pixels[32 * 64];  // RGBA, one per pixel
+
+    for (int y = 0; y < 32; y++) {
+        for (int x = 0; x < 64; x++) {
+            uint8_t mask = 0x80 >> (x % 8);
+
+            pixels[y * 64 + x] = (cpu->display[y][x / 8] & (0x80 >> (x % 8))) ? 0xFFFFFFFF : 0x000000FF;
+        }
+    }
+
+    SDL_UpdateTexture(cpu->texture, NULL, pixels, 64 * sizeof(uint32_t));
+    SDL_RenderClear(cpu->renderer);
+    SDL_RenderCopy(cpu->renderer, cpu->texture, NULL, NULL);
+    SDL_RenderPresent(cpu->renderer);
+}
+
 void execute(Chip8 *cpu, uint16_t op) {
   uint8_t type = (op >> 12) & 0xF;
   uint8_t X = (op >> 8) & 0xF;
