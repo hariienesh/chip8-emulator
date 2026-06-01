@@ -4,6 +4,7 @@
 #include <SDL2/SDL_video.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 void chip8_init_sdl(Chip8 *cpu) {
   SDL_Init(SDL_INIT_VIDEO);
@@ -16,6 +17,27 @@ void chip8_init_sdl(Chip8 *cpu) {
 
   cpu->texture = SDL_CreateTexture(cpu->renderer, SDL_PIXELFORMAT_RGBA8888,
                                    SDL_TEXTUREACCESS_STREAMING, 64, 32);
+
+  static const uint8_t font[80] = {
+      0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+      0x20, 0x60, 0x20, 0x20, 0x70, // 1
+      0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+      0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+      0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+      0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+      0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+      0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+      0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+      0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+      0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+      0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+      0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+      0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+      0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+      0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+  };
+
+  memcpy(&cpu->mem[0x000], font, 80);
 }
 
 void chip8_draw(Chip8 *cpu) {
@@ -242,6 +264,14 @@ void execute(Chip8 *cpu, uint16_t op) {
       cpu->sound_timer = cpu->V[X];
       break;
 
+    case 0x33: {
+        uint8_t val = cpu->V[X];
+
+        cpu->mem[cpu->I + 0] = val / 100;
+        cpu->mem[cpu->I + 1] = (val / 10) % 10;
+        cpu->mem[cpu->I + 2] = val % 10;
+    } break;
+
     case 0x55:
       for (int i = 0; i <= X; i++) {
         cpu->mem[cpu->I + i] = cpu->V[i];
@@ -269,6 +299,14 @@ void execute(Chip8 *cpu, uint16_t op) {
 
       break;
     }
+
+    case 0x1E:
+      cpu->I += cpu->V[X];
+      break;
+
+    case 0x29:
+      cpu->I = cpu->V[X] * 5;
+      break;
 
     default:
       break;
