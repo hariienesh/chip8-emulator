@@ -85,6 +85,30 @@ void execute(Chip8 *cpu, uint16_t op) {
     }
     break;
 
+  case 0xA:
+    cpu->I = NNN;
+    break;
+
+  case 0xF:
+    // Modern CHIP-8 behavior: I remains unchanged after FX55/FX65
+    switch (NN) {
+    case 0x55:
+      for (int i = 0; i <= X; i++) {
+        cpu->mem[cpu->I + i] = cpu->V[i];
+      }
+      break;
+    case 0x65:
+      for (int i = 0; i <= X; i++) {
+        cpu->V[i] = cpu->mem[cpu->I + i];
+      }
+      break;
+
+    default:
+      break;
+    }
+
+    break;
+
   case 0x1:
     cpu->PC = NNN;
     break;
