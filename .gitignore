@@ -1,4 +1,4 @@
 build/
+roms/
 *.o
 chip8
-*.ch8
