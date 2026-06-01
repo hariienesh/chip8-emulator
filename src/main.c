@@ -1,20 +1,31 @@
-#include <string.h>
+#include <SDL2/SDL.h>
 #include "chip8.h"
-
-void fetch(Chip8 *cpu);
 
 int main(void) {
     Chip8 cpu;
-    memset(&cpu, 0, sizeof(cpu));  // zero all memory/regs
+    memset(&cpu, 0, sizeof(cpu));
+    chip8_init_sdl(&cpu);
+    cpu.PC = 0x200;
 
-    cpu.PC = 0x200;  // CHIP-8 programs start here
+    // load ROM into mem starting at 0x200
+    FILE *f = fopen("rom.ch8", "rb");
+    if (!f) {
+        printf("Failed to open ROM\n");
+        return 1;
+    }
 
-    // hand-load two opcodes into RAM
-    cpu.mem[0x200] = 0x00; cpu.mem[0x201] = 0xE0;  // 00E0 clear
-    cpu.mem[0x202] = 0x12; cpu.mem[0x203] = 0x00;  // 1200 jump→0x200
+    fread(&cpu.mem[0x200], 1, MEM_SIZE - 0x200, f);
+    fclose(f);
 
-    // run 3 cycles
-    for (int i = 0; i < 3; i++) fetch(&cpu);
+    SDL_Event e;
+    int running = 1;
+    while (running) {
+        while (SDL_PollEvent(&e))
+            if (e.type == SDL_QUIT) running = 0;
 
+        fetch(&cpu);      // ~500–700Hz in real impl
+        chip8_draw(&cpu);
+        SDL_Delay(2);     // ~500Hz approx
+    }
     return 0;
 }

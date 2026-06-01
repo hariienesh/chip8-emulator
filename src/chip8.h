@@ -20,4 +20,8 @@ typedef struct {
   SDL_Texture *texture; // 64x32 pixel buffer
 } Chip8;
 
+void chip8_init_sdl(Chip8 *cpu);
+void fetch(Chip8 *cpu);
+void chip8_draw(Chip8 *cpu);
+
 #endif
