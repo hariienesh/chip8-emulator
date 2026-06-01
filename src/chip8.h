@@ -27,5 +27,6 @@ void chip8_init_sdl(Chip8 *cpu);
 void fetch(Chip8 *cpu);
 void chip8_draw(Chip8 *cpu);
 void chip8_tick_timers(Chip8 *cpu);
+int sdl_key_to_chip8(SDL_Scancode sc);
 
 #endif
