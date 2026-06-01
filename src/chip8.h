@@ -1,6 +1,7 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
+#include <SDL2/SDL.h>
 #include <stdint.h>
 
 #define MEM_SIZE 4096 // 4 KB RAM
@@ -13,7 +14,10 @@ typedef struct {
   uint8_t SP;    // stack pointer
   uint16_t stack[STACK_SIZE];
   uint8_t mem[MEM_SIZE];
-  uint8_t display[32][8];  // 32 rows, 8 bytes wide (64 bits)
+  uint8_t display[32][8]; // 32 rows, 8 bytes wide (64 bits)
+  SDL_Window *window;
+  SDL_Renderer *renderer;
+  SDL_Texture *texture; // 64x32 pixel buffer
 } Chip8;
 
 #endif

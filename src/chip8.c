@@ -1,6 +1,22 @@
 #include "chip8.h"
+#include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_video.h>
 #include <stdint.h>
 #include <stdio.h>
+
+void chip8_init_sdl(Chip8 *cpu) {
+  SDL_Init(SDL_INIT_VIDEO);
+
+  cpu->window =
+      SDL_CreateWindow("CHIP-8", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                       640, 320, SDL_WINDOW_SHOWN);
+
+  cpu->renderer = SDL_CreateRenderer(cpu->window, -1, 0);
+
+  cpu->texture = SDL_CreateTexture(cpu->renderer, SDL_PIXELFORMAT_RGBA8888,
+                                   SDL_TEXTUREACCESS_STREAMING, 64, 32);
+}
 
 void execute(Chip8 *cpu, uint16_t op) {
   uint8_t type = (op >> 12) & 0xF;
