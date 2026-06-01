@@ -89,6 +89,39 @@ void execute(Chip8 *cpu, uint16_t op) {
     cpu->I = NNN;
     break;
 
+  case 0xD: {
+    uint8_t x = cpu->V[X];
+    uint8_t y = cpu->V[Y];
+
+    cpu->V[0xF] = 0;
+
+    for (int row = 0; row < N; row++) {
+      uint8_t sprite_byte = cpu->mem[cpu->I + row];
+
+      for (int col = 0; col < 8; col++) {
+        uint8_t sprite_bit = (sprite_byte >> (7 - col)) & 1;
+
+        int px = (x + col) % 64;
+        int py = (y + row) % 32;
+
+        int byte_index = px / 8;
+        int bit_index = px % 8;
+
+        uint8_t mask = 0x80 >> bit_index;
+
+        if (sprite_bit) {
+          if (cpu->display[py][byte_index] & mask) {
+            cpu->V[0xF] = 1;
+          }
+
+          cpu->display[py][byte_index] ^= mask;
+        }
+      }
+    }
+
+    break;
+  }
+
   case 0xF:
     // Modern CHIP-8 behavior: I remains unchanged after FX55/FX65
     switch (NN) {

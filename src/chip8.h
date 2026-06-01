@@ -13,6 +13,7 @@ typedef struct {
   uint8_t SP;    // stack pointer
   uint16_t stack[STACK_SIZE];
   uint8_t mem[MEM_SIZE];
+  uint8_t display[32][8];  // 32 rows, 8 bytes wide (64 bits)
 } Chip8;
 
 #endif
