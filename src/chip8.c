@@ -121,8 +121,40 @@ void execute(Chip8 *cpu, uint16_t op) {
 
   switch (type) {
   case 0x0:
-    if (op == 0x00E0)
-      printf("CLEAR\n");
+    switch (op) {
+    case 0x00EE:
+      cpu->PC = cpu->stack[--cpu->SP];
+      break;
+    }
+    break;
+
+  case 0x1:
+    cpu->PC = NNN;
+    break;
+
+  case 0x2:
+    cpu->stack[cpu->SP++] = cpu->PC;
+    cpu->PC = NNN;
+    break;
+
+  case 0x3:
+    if (cpu->V[X] == NN)
+      cpu->PC += 2;
+    break;
+
+  case 0x4:
+    if (cpu->V[X] != NN)
+      cpu->PC += 2;
+    break;
+
+  case 0x5:
+    if (cpu->V[X] == cpu->V[Y])
+      cpu->PC += 2;
+    break;
+
+  case 0x9:
+    if (cpu->V[X] != cpu->V[Y])
+      cpu->PC += 2;
     break;
 
   case 0x6:
@@ -198,6 +230,10 @@ void execute(Chip8 *cpu, uint16_t op) {
     cpu->I = NNN;
     break;
 
+  case 0xB:
+    cpu->PC = cpu->V[0] + NNN;
+    break;
+
   case 0xD: {
     uint8_t x = cpu->V[X];
     uint8_t y = cpu->V[Y];
@@ -265,11 +301,11 @@ void execute(Chip8 *cpu, uint16_t op) {
       break;
 
     case 0x33: {
-        uint8_t val = cpu->V[X];
+      uint8_t val = cpu->V[X];
 
-        cpu->mem[cpu->I + 0] = val / 100;
-        cpu->mem[cpu->I + 1] = (val / 10) % 10;
-        cpu->mem[cpu->I + 2] = val % 10;
+      cpu->mem[cpu->I + 0] = val / 100;
+      cpu->mem[cpu->I + 1] = (val / 10) % 10;
+      cpu->mem[cpu->I + 2] = val % 10;
     } break;
 
     case 0x55:
@@ -312,10 +348,6 @@ void execute(Chip8 *cpu, uint16_t op) {
       break;
     }
 
-    break;
-
-  case 0x1:
-    cpu->PC = NNN;
     break;
 
   default:
