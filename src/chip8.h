@@ -18,10 +18,14 @@ typedef struct {
   SDL_Window *window;
   SDL_Renderer *renderer;
   SDL_Texture *texture; // 64x32 pixel buffer
+  uint8_t delay_timer;
+  uint8_t sound_timer;
+  uint8_t keys[16];
 } Chip8;
 
 void chip8_init_sdl(Chip8 *cpu);
 void fetch(Chip8 *cpu);
 void chip8_draw(Chip8 *cpu);
+void chip8_tick_timers(Chip8 *cpu);
 
 #endif

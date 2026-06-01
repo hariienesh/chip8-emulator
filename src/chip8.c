@@ -19,20 +19,31 @@ void chip8_init_sdl(Chip8 *cpu) {
 }
 
 void chip8_draw(Chip8 *cpu) {
-    uint32_t pixels[32 * 64];  // RGBA, one per pixel
+  uint32_t pixels[32 * 64]; // RGBA, one per pixel
 
-    for (int y = 0; y < 32; y++) {
-        for (int x = 0; x < 64; x++) {
-            uint8_t mask = 0x80 >> (x % 8);
+  for (int y = 0; y < 32; y++) {
+    for (int x = 0; x < 64; x++) {
+      uint8_t mask = 0x80 >> (x % 8);
 
-            pixels[y * 64 + x] = (cpu->display[y][x / 8] & (0x80 >> (x % 8))) ? 0xFFFFFFFF : 0x000000FF;
-        }
+      pixels[y * 64 + x] = (cpu->display[y][x / 8] & (0x80 >> (x % 8)))
+                               ? 0xFFFFFFFF
+                               : 0x000000FF;
     }
+  }
 
-    SDL_UpdateTexture(cpu->texture, NULL, pixels, 64 * sizeof(uint32_t));
-    SDL_RenderClear(cpu->renderer);
-    SDL_RenderCopy(cpu->renderer, cpu->texture, NULL, NULL);
-    SDL_RenderPresent(cpu->renderer);
+  SDL_UpdateTexture(cpu->texture, NULL, pixels, 64 * sizeof(uint32_t));
+  SDL_RenderClear(cpu->renderer);
+  SDL_RenderCopy(cpu->renderer, cpu->texture, NULL, NULL);
+  SDL_RenderPresent(cpu->renderer);
+}
+
+void chip8_tick_timers(Chip8 *cpu) {
+  if (cpu->delay_timer > 0)
+    cpu->delay_timer--;
+  if (cpu->sound_timer > 0) {
+    // beep here later
+    cpu->sound_timer--;
+  }
 }
 
 void execute(Chip8 *cpu, uint16_t op) {
@@ -155,9 +166,39 @@ void execute(Chip8 *cpu, uint16_t op) {
     break;
   }
 
+  case 0xE:
+    switch (NN) {
+    case 0x9E:
+      if (cpu->keys[cpu->V[X]]) {
+        cpu->PC += 2;
+      }
+
+      break;
+    case 0xA1:
+      if (!cpu->keys[cpu->V[X]]) {
+        cpu->PC += 2;
+      }
+
+      break;
+    }
+
+    break;
+
   case 0xF:
     // Modern CHIP-8 behavior: I remains unchanged after FX55/FX65
     switch (NN) {
+    case 0x07:
+      cpu->V[X] = cpu->delay_timer;
+      break;
+
+    case 0x15:
+      cpu->delay_timer = cpu->V[X];
+      break;
+
+    case 0x18:
+      cpu->sound_timer = cpu->V[X];
+      break;
+
     case 0x55:
       for (int i = 0; i <= X; i++) {
         cpu->mem[cpu->I + i] = cpu->V[i];
@@ -168,6 +209,22 @@ void execute(Chip8 *cpu, uint16_t op) {
         cpu->V[i] = cpu->mem[cpu->I + i];
       }
       break;
+
+    case 0x0A: {
+      int found = 0;
+
+      for (int i = 0; i <= 15; i++) {
+        if (cpu->keys[i] == 1) {
+          found = 1;
+          cpu->V[X] = i;
+          break;
+        }
+      }
+
+      if (found != 1) cpu->PC -= 2;
+
+      break;
+    }
 
     default:
       break;
